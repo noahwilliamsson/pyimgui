@@ -295,6 +295,141 @@ class ProgrammablePipelineRenderer(BaseOpenGLRenderer):
         self._font_texture = 0
 
 
+class ExamplePipelineRenderer(BaseOpenGLRenderer):
+    # These are called from the base class
+    def _create_device_objects(self):
+        print('_create_device_objects enter')
+        self._create_fonts_texture()
+
+    # Called by the base class
+    def _invalidate_device_objects(self):
+        if self._font_texture > -1:
+            gl.glDeleteTextures([self._font_texture])
+        self.io.fonts.texture_id = 0
+        self._font_texture = None
+
+    def _create_fonts_texture(self):
+        print('_create_fonts_texture enter (called from create_device_objects()')
+        width, height, pixels = self.io.fonts.get_tex_data_as_rgba32()
+        last_texture = gl.glGetIntegerv(gl.GL_TEXTURE_BINDING_2D)
+        self._font_texture = gl.glGenTextures(1)
+        print('_create_fonts_texture() last={}, font={}'.format(last_texture, self._font_texture))
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self._font_texture)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+        #gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, pixels)
+        gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, 0)
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, pixels)
+        self.io.fonts.texture_id = self._font_texture
+
+        # Restore state
+        gl.glBindTexture(gl.GL_TEXTURE_2D, last_texture)
+        #self.io.fonts.clear_tex_data()
+
+    def new_frame(self):
+        if not self._font_texture:
+            print('new_frame() has to recreate device objects')
+            self._create_device_objects()
+
+    def refresh_font_texture(self):
+        pass
+        #self._create_fonts_texture()
+
+    def setup_render_state(self, draw_data, fb_width, fb_height):
+        print('setup_render_state() entered with {}, {}'.format(fb_width, fb_height))
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        gl.glDisable(gl.GL_CULL_FACE)
+        gl.glDisable(gl.GL_DEPTH_TEST)
+        gl.glDisable(gl.GL_LIGHTING)
+        gl.glDisable(gl.GL_COLOR_MATERIAL)
+        gl.glEnable(gl.GL_SCISSOR_TEST)
+        gl.glEnableClientState(gl.GL_VERTEX_ARRAY)
+        gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY)
+        gl.glEnableClientState(gl.GL_COLOR_ARRAY)
+        gl.glEnable(gl.GL_TEXTURE_2D)
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+        gl.glViewport(0, 0, int(fb_width), int(fb_height))
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glPushMatrix()
+        gl.glLoadIdentity()
+        io = self.io
+        gl.glOrtho(0, io.display_size.x, io.display_size.y, 0.0, -1.0, +1.0)
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        gl.glPushMatrix()
+        gl.glLoadIdentity()
+
+    def render(self, draw_data):
+        print('render() enter')
+        # perf: local for faster access
+        io = self.io
+
+        # Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
+        display_width, display_height = io.display_size
+        fb_width = int(display_width * io.display_fb_scale[0])
+        fb_height = int(display_height * io.display_fb_scale[1])
+        if fb_width == 0 or fb_height == 0:
+            return
+
+        # Backup GL state
+        last_texture = gl.glGetIntegerv(gl.GL_TEXTURE_BINDING_2D)
+        last_polygon_mode = gl.glGetIntegerv(gl.GL_POLYGON_MODE)
+        last_viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+        last_scissor_box = gl.glGetIntegerv(gl.GL_SCISSOR_BOX)
+        gl.glPushAttrib(gl.GL_ENABLE_BIT | gl.GL_COLOR_BUFFER_BIT | gl.GL_TRANSFORM_BIT)
+
+        # Setup desired state
+        self.setup_render_state(draw_data, fb_width, fb_height)
+
+        # Will project scissor/clipping rectangles into framebuffer space
+        #clip_off = draw_data.display_pos
+        #clip_scale = draw_data.framebuffer_scale
+        draw_data.scale_clip_rects(*io.display_fb_scale)
+
+        # Render command lists
+        print('render() processing draw data (for #1)')
+        for commands in draw_data.commands_lists:
+            idx_buffer = commands.idx_buffer_data
+
+            print('render() command defining pointer arrays with stride {} and offsets pos={}, uv={}, col={}'.format(imgui.VERTEX_SIZE, imgui.VERTEX_BUFFER_POS_OFFSET, imgui.VERTEX_BUFFER_UV_OFFSET, imgui.VERTEX_BUFFER_COL_OFFSET))
+            # This will go BOOOM on Raspberry Pi 3/4 unless PYOPENGL_PLATFORM=egl !@#@% :(
+            gl.glVertexPointer(2, gl.GL_FLOAT, imgui.VERTEX_SIZE, ctypes.c_void_p(commands.vtx_buffer_data + imgui.VERTEX_BUFFER_POS_OFFSET))
+            gl.glTexCoordPointer(2, gl.GL_FLOAT, imgui.VERTEX_SIZE, ctypes.c_void_p(commands.vtx_buffer_data + imgui.VERTEX_BUFFER_UV_OFFSET))
+            gl.glColorPointer(4, gl.GL_UNSIGNED_BYTE, imgui.VERTEX_SIZE, ctypes.c_void_p(commands.vtx_buffer_data + imgui.VERTEX_BUFFER_COL_OFFSET))
+
+            print('render() executing command list (for #2)')
+            for command in commands.commands:
+                print('render() processing command in list with texture id {}'.format(command.texture_id))
+                gl.glBindTexture(gl.GL_TEXTURE_2D, command.texture_id)
+
+                x, y, z, w = command.clip_rect
+                gl.glScissor(int(x), int(fb_height - w), int(z - x), int(w - y))
+
+                if imgui.INDEX_SIZE == 2:
+                    gltype = gl.GL_UNSIGNED_SHORT
+                else:
+                    gltype = gl.GL_UNSIGNED_INT
+
+                gl.glDrawElements(gl.GL_TRIANGLES, command.elem_count, gltype, ctypes.c_void_p(idx_buffer))
+
+                idx_buffer += (command.elem_count * imgui.INDEX_SIZE)
+
+    # Restpre modified GL state
+    gl.glDisableClientState(gl.GL_COLOR_ARRAY)
+    gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY)
+    gl.glDisableClientState(gl.GL_VERTEX_ARRAY)
+    gl.glBindTexture(gl.GL_TEXTURE_2D, last_texture)
+    gl.glMatrixMode(gl.GL_MODELVIEW)
+    gl.glPopMatrix()
+    gl.glMatrixMode(gl.GL_PROJECTION)
+    gl.glPopMatrix()
+    gl.glPopAttrib()
+    gl.glPolygonMode(gl.GL_FRONT, last_polygon_mode[0])
+    gl.glPolygonMode(gl.GL_BACK, last_polygon_mode[1])
+    gl.glViewport(last_viewport[0], last_viewport[1], int(last_viewport[2]), int(last_viewport[3]))
+    gl.glScissor(last_scissor_box[0], last_scissor_box[1], int(last_scissor_box[2]), int(last_scissor_box[3]))
+
+
 class FixedPipelineRenderer(BaseOpenGLRenderer):
     """Basic OpenGL integration base class."""
 

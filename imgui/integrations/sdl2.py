@@ -7,9 +7,11 @@ import imgui
 import ctypes
 
 from .opengl import ProgrammablePipelineRenderer
+from .opengl import ExamplePipelineRenderer
 
 
-class SDL2Renderer(ProgrammablePipelineRenderer):
+#class SDL2Renderer(ProgrammablePipelineRenderer):
+class SDL2Renderer(ExamplePipelineRenderer):
     """Basic SDL2 integration implementation."""
     MOUSE_WHEEL_OFFSET_SCALE = 0.5
 
