@@ -239,6 +239,52 @@ cdef extern from "imgui.h":
         ) except +  # ✓
 
 
+        void AddRectFilledMultiColor(
+            const ImVec2& a,
+            const ImVec2& b,
+            ImU32 col_upr_left,
+            ImU32 col_upr_right,
+            ImU32 col_bot_right,
+            ImU32 col_bot_left
+        ) except +  # ✓
+
+
+        void AddQuad(
+            const ImVec2& p1,
+            const ImVec2& p2,
+            const ImVec2& p3,
+            const ImVec2& p4,
+            ImU32 col,
+            float thickness             # = 1.0f
+        ) except +  # ✓
+
+
+        void AddQuadFilled(
+            const ImVec2& p1,
+            const ImVec2& p2,
+            const ImVec2& p3,
+            const ImVec2& p4,
+            ImU32 col
+        ) except +  # ✓
+
+
+        void AddTriangle(
+            const ImVec2& p1,
+            const ImVec2& p2,
+            const ImVec2& p3,
+            ImU32 col,
+            float thickness             # = 1.0f
+        ) except +  # ✓
+
+
+        void AddTriangleFilled(
+            const ImVec2& p1,
+            const ImVec2& p2,
+            const ImVec2& p3,
+            ImU32 col
+        ) except +  # ✓
+
+
         void  AddCircle(
            const ImVec2& centre,
            float radius,
@@ -284,6 +330,46 @@ cdef extern from "imgui.h":
             ImU32 col,
             bool closed,
             float thickness
+        ) except +  # ✓
+
+
+        void PathArcTo(
+            const ImVec2& center,
+            float radius,
+            float a_min,
+            float a_max,
+            int num_segments           # = 10
+        ) except +  # ✓
+
+
+        void PathArcToFast(
+            const ImVec2& center,
+            float radius,
+            int a_min_of_12,
+            int a_max_of_12
+        ) except +  # ✓
+
+
+        void PathBezierCurveTo(
+            const ImVec2& p1,
+            const ImVec2& p2,
+            const ImVec2& p3,
+            int num_segments           # = 0
+        ) except +  # ✓
+
+
+        void PathRect(
+            const ImVec2& rect_min,
+            const ImVec2& rect_max,
+            float rounding,            # = 0.0f
+            int rounding_corners       # = ImDrawCornerFlags_All
+        ) except +  # ✓
+
+
+        void PathStroke(
+            ImU32 col,
+            bool closed,
+            float thickness            # = 1.0f
         ) except +  # ✓
 
 

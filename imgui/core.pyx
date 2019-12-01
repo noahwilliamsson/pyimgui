@@ -539,6 +539,228 @@ cdef class _DrawList(object):
             rounding_corners_flags,
         )
 
+    def add_rect_filled_multi_color(
+            self,
+            float upper_left_x, float upper_left_y,
+            float lower_right_x, float lower_right_y,
+            cimgui.ImU32 color_upper_left, cimgui.ImU32 color_upper_right,
+            cimgui.ImU32 color_bottom_right, cimgui.ImU32 color_bottom_left
+        ):
+        """Add a filled multi color rectangle to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Filled multi color rect example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.add_rect_filled_multi_color(20, 35, 90, 80, imgui.get_color_u32_rgba(0,0,0,1), imgui.get_color_u32_rgba(1,0,0,1), imgui.get_color_u32_rgba(1,1,0,1), imgui.get_color_u32_rgba(0,1,0,1))
+            imgui.end()
+
+        Args:
+            upper_left_x (float): X coordinate of top-left corner
+            upper_left_y (float): Y coordinate of top-left corner
+            lower_right_x (float): X coordinate of lower-right corner
+            lower_right_y (float): Y coordinate of lower-right corner
+            color_upper_left (ImU32): RGBA color specification
+            color_upper_right (ImU32): RGBA color specification
+            color_bottom_right (ImU32): RGBA color specification
+            color_bottom_left (ImU32): RGBA color specification
+
+        .. wraps::
+            void ImDrawList::AddRectFilledMultiColor(
+                const ImVec2& a,
+                const ImVec2& b,
+                ImU32 col_upr_left,
+                ImU32 col_upr_right,
+                ImU32 col_bot_right,
+                ImU32 col_bot_left
+            )
+        """
+        self._ptr.AddRectFilledMultiColor(
+            _cast_args_ImVec2(upper_left_x, upper_left_y),
+            _cast_args_ImVec2(lower_right_x, lower_right_y),
+            color_upper_left, color_upper_right,
+            color_bottom_right, color_bottom_left
+        )
+
+    def add_quad(
+            self,
+            tuple p1,
+            tuple p2,
+            tuple p3,
+            tuple p4,
+            cimgui.ImU32 col,
+            float thickness = 1.0
+        ):
+        """Add a quad to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Quad example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.add_quad((0, 0), (10, 0), (10, 10), (0, 10), imgui.get_color_u32_rgba(0,1,1,1), 1.0)
+            imgui.end()
+
+        Args:
+            p1 (tuple): X, Y coordinates of point 1
+            p2 (tuple): X, Y coordinates of point 2
+            p3 (tuple): X, Y coordinates of point 3
+            p4 (tuple): X, Y coordinates of point 4
+            col (ImU32): RGBA color specification
+            thickness (float): stroke thickness in pixels
+
+        .. wraps::
+            void ImDrawList::AddQuad(
+                const ImVec2& p1,
+                const ImVec2& p2,
+                const ImVec2& p3,
+                const ImVec2& p4,
+                ImU32 col,
+                float thickness = 1.0f
+            )
+        """
+        self._ptr.AddQuad(
+            _cast_tuple_ImVec2(p1),
+            _cast_tuple_ImVec2(p2),
+            _cast_tuple_ImVec2(p3),
+            _cast_tuple_ImVec2(p4),
+            col,
+            thickness
+        )
+
+    def add_quad_filled(
+            self,
+            tuple p1,
+            tuple p2,
+            tuple p3,
+            tuple p4,
+            cimgui.ImU32 col
+        ):
+        """Add a filled quad to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Filled quad example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.add_quad_filled((0, 0), (10, 0), (10, 10), (0, 10), imgui.get_color_u32_rgba(0,1,1,1))
+            imgui.end()
+
+        Args:
+            p1 (tuple): X, Y coordinates of point 1
+            p2 (tuple): X, Y coordinates of point 2
+            p3 (tuple): X, Y coordinates of point 3
+            p4 (tuple): X, Y coordinates of point 4
+            col (ImU32): RGBA color specification
+
+        .. wraps::
+            void ImDrawList::AddQuadFilled(
+                const ImVec2& p1,
+                const ImVec2& p2,
+                const ImVec2& p3,
+                const ImVec2& p4,
+                ImU32 col
+            )
+        """
+        self._ptr.AddQuadFilled(
+            _cast_tuple_ImVec2(p1),
+            _cast_tuple_ImVec2(p2),
+            _cast_tuple_ImVec2(p3),
+            _cast_tuple_ImVec2(p4),
+            col
+        )
+
+    def add_triangle(
+            self,
+            tuple p1,
+            tuple p2,
+            tuple p3,
+            cimgui.ImU32 col,
+            float thickness = 1.0
+        ):
+        """Add a traingle to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Triangle example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.add_triangle((0, 0), (10, 0), (5, 5), imgui.get_color_u32_rgba(0,1,1,1), 1.0)
+            imgui.end()
+
+        Args:
+            p1 (tuple): X, Y coordinates of point 1
+            p2 (tuple): X, Y coordinates of point 2
+            p3 (tuple): X, Y coordinates of point 3
+            col (ImU32): RGBA color specification
+            thickness (float): stroke thickness in pixels
+
+        .. wraps::
+            void ImDrawList::AddTriangle(
+                const ImVec2& p1,
+                const ImVec2& p2,
+                const ImVec2& p3,
+                ImU32 col,
+                float thickness = 1.0f
+            )
+        """
+        self._ptr.AddTriangle(
+            _cast_tuple_ImVec2(p1),
+            _cast_tuple_ImVec2(p2),
+            _cast_tuple_ImVec2(p3),
+            col,
+            thickness
+        )
+
+    def add_triangle_filled(
+            self,
+            tuple p1,
+            tuple p2,
+            tuple p3,
+            cimgui.ImU32 col
+        ):
+        """Add a filled triangle to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Filled triangle example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.add_triangle_filled((0, 0), (10, 0), (5, 5), imgui.get_color_u32_rgba(0,1,1,1))
+            imgui.end()
+
+        Args:
+            p1 (tuple): X, Y coordinates of point 1
+            p2 (tuple): X, Y coordinates of point 2
+            p3 (tuple): X, Y coordinates of point 3
+            col (ImU32): RGBA color specification
+
+        .. wraps::
+            void ImDrawList::AddTriangleFilled((
+                const ImVec2& p1,
+                const ImVec2& p2,
+                const ImVec2& p3,
+                ImU32 col
+            )
+        """
+        self._ptr.AddTriangleFilled(
+            _cast_tuple_ImVec2(p1),
+            _cast_tuple_ImVec2(p2),
+            _cast_tuple_ImVec2(p3),
+            col
+        )
+
     def add_circle(
             self,
             float centre_x, float centre_y,
@@ -762,6 +984,218 @@ cdef class _DrawList(object):
             thickness
         )
         free(pts)
+
+    def path_arc_to(
+            self,
+            tuple center,
+            float radius,
+            float a_min,
+            float a_max,
+            # note: optional
+            int num_segments = 10
+        ):
+        """Add an arc to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Arc drawing example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.path_arc_to((50, 50), 20.0, math.radians(60), math.radians(120), 10)
+            draw_list.path_stroke(imgui.get_color_u32_rgba(1,0,0,1), False, 4.)
+            imgui.end()
+
+        Args:
+            center (tuple): circle center coordinates
+            radius (float): circle radius
+            a_min (float): start angle
+            a_max (float): end angle
+            num_segments (ImU32): Number of segments, defaults to 10
+
+        .. wraps::
+            void ImDrawList::PathArcTo(
+                const ImVec2& center,
+                float radius,
+                float a_min,
+                float a_max,
+                int num_segments = 10
+            )
+        """
+        self._ptr.PathArcTo(
+            _cast_tuple_ImVec2(center),
+            radius,
+            a_min,
+            a_max,
+            num_segments
+        )
+
+    def path_arc_to_fast(
+            self,
+            tuple center,
+            float radius,
+            int a_min_of_12,
+            int a_max_of_12
+        ):
+        """Add an arc to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Fast arc drawing example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.path_arc_to_fast((50, 50), math.radians(60), math.radians(120))
+            draw_list.path_stroke(imgui.get_color_u32_rgba(1,0,0,1), False, 4.)
+            imgui.end()
+
+        Args:
+            center (tuple): circle center coordinates
+            radius (float): circle radius
+            a_min_of_12 (float): start angle
+            a_max_of_12 (float): end angle
+
+        .. wraps::
+            void ImDrawList::PathArcToFast(
+                const ImVec2& center,
+                float radius,
+                int a_min_of_12,
+                int a_max_of_12
+            )
+        """
+        self._ptr.PathArcToFast(
+            _cast_tuple_ImVec2(center),
+            radius,
+            a_min_of_12,
+            a_max_of_12
+        )
+
+    def path_bezier_curve_to(
+            self,
+            tuple p1,
+            tuple p2,
+            tuple p3,
+            int num_segments = 0
+        ):
+        """Add an arc to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Bezier curve drawing example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.path_bezier_curve_to((50, 50), (50+10*, 10), (40, 50))
+            draw_list.path_stroke(imgui.get_color_u32_rgba(1,0,0,1), False, 4.)
+            imgui.end()
+
+        Args:
+            p1 (tuple): coordinates for point 1
+            p2 (tuple): coordinates for point 2
+            p3 (tuple): coordinates for point 3
+            num_segments (int): number of segments
+
+        .. wraps::
+            void ImDrawList::PathBezierCurveTo(
+                const ImVec2& p1,
+                const ImVec2& p2,
+                const ImVec2& p3,
+                int num_segments
+            )
+        """
+        self._ptr.PathBezierCurveTo(
+            _cast_tuple_ImVec2(p1),
+            _cast_tuple_ImVec2(p2),
+            _cast_tuple_ImVec2(p3),
+            num_segments
+        )
+
+    def path_rect(
+            self,
+            tuple rect_min,
+            tuple rect_max,
+            float rounding = 0.0,
+            int rounding_corners_flags = 0xF
+        ):
+        """Add a rectangle to the draw list.
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Path rect example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.path_rect((10, 10), (80, 40), 1.)
+            draw_list.path_stroke(imgui.get_color_u32_rgba(0,1,0,1), False, 4.)
+            imgui.end()
+
+        Args:
+            rect_min (tuple): top-left coordinates
+            rect_max (tuple): bottom-right coordinates
+            rounding (float): Degree of rounding, defaults to 0.0
+            rounding_corners_flags (ImDrawCornerFlags): Draw flags, defaults to ImDrawCornerFlags_ALL
+
+        .. wraps::
+            void ImDrawList::PathRect((
+                const ImVec2& rect_min,
+                const ImVec2& rect_max,
+                float rounding,
+                int rounding_corners
+            )
+        """
+        self._ptr.PathRect(
+            _cast_tuple_ImVec2(rect_min),
+            _cast_tuple_ImVec2(rect_max),
+            rounding,
+            rounding_corners_flags
+        )
+
+    def path_stroke(
+            self,
+            cimgui.ImU32 col,
+            bool closed,
+            float thickness = 1.0
+        ):
+
+        """Stroke path segments
+
+        .. visual-example::
+            :auto_layout:
+            :width: 200
+            :height: 100
+
+            imgui.begin("Filled circle example")
+            draw_list = imgui.get_window_draw_list()
+            draw_list.path_rect((10, 10), (80, 40), 1.)
+            draw_list.path_stroke(imgui.get_color_u32_rgba(0,1,0,1), False, 4.)
+            draw_list.path_bezier_curve_to((0, 50), (10, 10), (40, 50))
+            draw_list.path_stroke(imgui.get_color_u32_rgba(1,0,0,1), False, 4.)
+            imgui.end()
+
+        Args:
+            centre_x (float): circle centre coordinates
+            centre_y (float): circle centre coordinates
+            radius (float): circle radius
+            col (ImU32): RGBA color specification
+            num_segments (ImU32): Number of segments, defaults to 12
+
+        .. wraps::
+            void ImDrawList::AddCircleFilled(
+                const ImVec2& centre,
+                float radius,
+                ImU32 col,
+                int num_segments = 12
+            )
+        """
+        self._ptr.PathStroke(
+            col,
+            closed,
+            thickness
+        )
 
     # channels
 
